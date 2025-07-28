@@ -1,0 +1,8 @@
+<h3>Usuarios en línea (últimos 5 min):</h3>
+<ul>
+    {% for user in activos %}
+    <li>{{ user.user.username }} — {{ user.ultima_actividad|date:"H:i:s" }}</li>
+    {% empty %}
+    <li>No hay usuarios activos en este momento.</li>
+    {% endfor %}
+</ul>

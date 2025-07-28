@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="refresh" content="60">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'">
+    <meta name="referrer" content="no-referrer">
+    <title>Inventario Bodega</title>
+   
+    
+<body>
+    
+
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">Logistica ChileanTrading</a>
+        </div>
+    </nav>
+    
+
+    <div class="mb-3">
+        <a href="{% url 'exportar_excel' %}" class="btn btn-success">📤 Exportar Excel</a>
+    </div>
+    <a href="{% url 'inicio' %}" class="btn btn-secondary mt-3">⬅️ Volver al inicio</a>
+
+    <div class="container-fluid mt-4">
+
+        <h4 class="mb-3">📦 Productos almacenados</h4>
+        
+        
+        <div class="container table-responsive">
+            
+            <form method="get" class="row g-2 mb-3">
+                <div class="col-md-10">
+                    <input type="text" name="q" class="form-control" placeholder="Buscar en todos los campos..." value="{{ request.GET.q }}">
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100">🔍 Buscar</button>
+                </div>
+            </form>
+            
+            <div class="mb-3 text-end">
+                <a href="{% url 'lista_productos' %}" class="btn btn-secondary">🔄 Limpiar búsqueda</a>
+            </div>
+            
+            
+            
+            
+            <table class="table table-striped table-bordered table-hover align-middle">
+                <thead class="table-dark text-center">
+                    <tr>
+                        <th>ID</th>
+                        <th>Categoría</th>
+                        <th>Empresa</th>
+                        <th>Pasillo</th>
+                        <th>Ubicación</th>
+                        <th>Cod_EAN</th>
+                        <th>Cod_DUN</th>
+                        <th>Cod_Sistema</th>
+                        <th>Descripción</th>
+                        <th>Unidad</th>
+                        <th>Pack</th>
+                        <th>Factorx</th>
+                        <th>Cajas</th>
+                        <th>Saldo</th>
+                        <th>Stock Físico</th>
+                        <th>Observación</th>
+                        <th>Fecha Venc</th>
+                        <th>Fecha IMP</th>
+                        <th>Contenedor</th>
+                        <th>Fecha INV</th>
+                        <th>Encargado</th>
+                        <th>Acciones</th>
+                        
+                    
+                        
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in productos %}
+                    <tr>
+                        <td>{{ p.id }}</td>
+                        <td>{{ p.categoria }}</td>
+                        <td>{{ p.empresa }}</td>
+                        <td>{{ p.pasillo }}</td>
+                        <td>{{ p.ubicacion }}</td>
+                        <td>{{ p.cod_ean }}</td>
+                        <td>{{ p.cod_dun }}</td>
+                        <td>{{ p.cod_sistema }}</td>
+                        <td>{{ p.descripcion }}</td>
+                        <td>{{ p.unidad }}</td>
+                        <td>{{ p.pack }}</td>
+                        <td>{{ p.factorx }}</td>
+                        <td>{{ p.cajas }}</td>
+                        <td>{{ p.saldo }}</td>
+                        <td>{{ p.stock_fisico }}</td>
+                        <td>{{ p.observacion }}</td>
+                        <td>{{ p.fecha_venc }}</td>
+                        <td>{{ p.fecha_imp }}</td>
+                        <td>{{ p.contenedor }}</td>
+                        <td>{{ p.fecha_inv }}</td>
+                        <td>{{ p.encargado }}</td>
+                        <td class="text-center">
+                        <a href="{% url 'editar_producto' p.id %}" class="btn btn-warning btn-sm">✏️ Editar</a>
+                        <a href="{% url 'eliminar_producto' p.id %}" class="btn btn-danger btn-sm">🗑️ Eliminar</a>
+                        </td>
+                    
+                    
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+    
+</body>
+</html>

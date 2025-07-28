@@ -13,6 +13,8 @@
 <body>
 <div class="container mt-4">
     <h3>📍 Escanea la ubicación con cámara o lector USB</h3>
+
+    <button id="capture">📸 Tomar Foto</button>
     <a href="{% url 'inicio' %}" class="btn btn-secondary mt-3">⬅️ Volver al inicio</a>
 
     <!-- DIV para la cámara -->
@@ -77,6 +79,38 @@
 </div>
 
 <script>
+
+    // Paso 1: Acceder a la cámara trasera
+    navigator.mediaDevices.getUserMedia({
+        video: { facingMode: { exact: "environment" } }, // ← Cámara trasera
+        audio: false
+    })
+    .then(function (stream) {
+        document.getElementById('video').srcObject = stream;
+    })
+    .catch(function (err) {
+        console.error("Error al acceder a la cámara trasera:", err);
+        alert("No se pudo acceder a la cámara trasera. Verifica permisos.");
+    });
+
+    // Paso 2: Capturar la imagen del video en un canvas
+    document.getElementById('capture').addEventListener('click', function () {
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const context = canvas.getContext('2d');
+
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+
+        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+        canvas.style.display = 'block';
+
+        // Opcional: obtener la imagen en base64
+        const foto = canvas.toDataURL("image/png");
+        console.log(foto); // Puedes enviarla por AJAX al backend si deseas
+    });
+
+
     // Escaneo con cámara usando Html5Qrcode
     function onScanSuccess(decodedText, decodedResult) {
         document.getElementById('codigoScan').value = decodedText;

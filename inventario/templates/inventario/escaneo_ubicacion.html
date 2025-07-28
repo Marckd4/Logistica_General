@@ -93,52 +93,8 @@
         alert("No se pudo acceder a la cámara trasera. Verifica permisos.");
     });
 
-    // Paso 2: Capturar la imagen del video en un canvas
-    document.getElementById('capture').addEventListener('click', function () {
-        const video = document.getElementById('video');
-        const canvas = document.getElementById('canvas');
-        const context = canvas.getContext('2d');
 
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-
-        context.drawImage(video, 0, 0, canvas.width, canvas.height);
-        canvas.style.display = 'block';
-
-        // Opcional: obtener la imagen en base64
-        const foto = canvas.toDataURL("image/png");
-        console.log(foto); // Puedes enviarla por AJAX al backend si deseas
-    });
-
-
-    // Escaneo con cámara usando Html5Qrcode
-    function onScanSuccess(decodedText, decodedResult) {
-        document.getElementById('codigoScan').value = decodedText;
-        document.getElementById('formScan').submit();
-    }
-
-    function onScanFailure(error) {
-        // No hacer nada por ahora
-    }
-
-    const html5QrCode = new Html5Qrcode("reader");
-
-    Html5Qrcode.getCameras()
-        .then(devices => {
-            if (devices && devices.length) {
-                const cameraId = devices[0].id;
-                html5QrCode.start(
-                    cameraId,
-                    { fps: 10, qrbox: 250 },
-                    onScanSuccess,
-                    onScanFailure
-                );
-            }
-        })
-        .catch(err => {
-            console.error("No se pudo iniciar la cámara:", err);
-        });
-
+    
     // Escaneo con lector USB (input de texto)
     const input = document.getElementById('codigoInput');
     input.addEventListener('keypress', function(event) {

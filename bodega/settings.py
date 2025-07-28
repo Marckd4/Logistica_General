@@ -137,3 +137,6 @@ LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'inicio'
 LOGOUT_REDIRECT_URL = 'login'
 
+ALLOWED_HOSTS = ['logistica-general.onrender.com', 'localhost', '127.0.0.1']
+
+

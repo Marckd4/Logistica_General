@@ -43,40 +43,49 @@
   </ul>
 {% endif %}
 
-<script src="https://unpkg.com/@zxing/browser@latest"></script>
+<script src="https://unpkg.com/@zxing/library@0.18.6/umd/index.min.js"></script>
+
 
 <script>
   const video = document.getElementById('video');
   const startBtn = document.getElementById('start-scan');
   const inputUbicacion = document.getElementById('ubicacion-input');
 
+  const codeReader = new ZXing.BrowserMultiFormatReader();
+
   startBtn.addEventListener('click', async () => {
     try {
       const devices = await navigator.mediaDevices.enumerateDevices();
-      const backCam = devices.find(device => device.kind === 'videoinput' && device.label.toLowerCase().includes('back')) || devices[0];
+      const videoInputDevices = devices.filter(device => device.kind === 'videoinput');
+      const backCam = videoInputDevices.find(device =>
+        device.label.toLowerCase().includes('back')
+      ) || videoInputDevices[0];
 
-      const stream = await navigator.mediaDevices.getUserMedia({
+      const constraints = {
         video: {
-          deviceId: backCam.deviceId ? { exact: backCam.deviceId } : undefined,
+          deviceId: backCam.deviceId,
           facingMode: 'environment'
         }
-      });
+      };
 
+      const stream = await navigator.mediaDevices.getUserMedia(constraints);
       video.srcObject = stream;
 
-      const codeReader = new ZXing.BrowserBarcodeReader();
       codeReader.decodeOnceFromVideoElement(video)
         .then(result => {
           inputUbicacion.value = result.text;
           document.querySelector('form').submit();
         })
-        .catch(err => alert("Error al escanear: " + err));
+        .catch(err => {
+          alert("No se pudo leer el código: " + err);
+        });
 
     } catch (error) {
-      alert("No se pudo acceder a la cámara: " + error.message);
+      alert("Error al acceder a la cámara: " + error.message);
     }
   });
 </script>
+
 
 </body>
 </html>

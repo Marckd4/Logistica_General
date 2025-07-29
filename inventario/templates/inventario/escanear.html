@@ -6,19 +6,77 @@
   <title>Escanear Ubicación</title>
   <script src="https://unpkg.com/@zxing/library@latest"></script>
   <style>
-    body { font-family: Arial, sans-serif; padding: 20px; }
-    video { width: 100%; max-width: 600px; border: 2px solid #333; border-radius: 8px; }
-    button { margin-top: 10px; padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 6px; cursor: pointer; }
-    table { margin-top: 20px; border-collapse: collapse; width: 100%; }
-    th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
-    th { background-color: #f0f0f0; }
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      text-align: center;
+      background-color: #f9f9f9;
+    }
+
+    .video-container {
+      position: relative;
+      display: inline-block;
+    }
+
+    video {
+      width: 100%;
+      max-width: 600px;
+      border-radius: 8px;
+    }
+
+    .overlay {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 80%;
+      height: 30%;
+      transform: translate(-50%, -50%);
+      border: 2px dashed red;
+      border-radius: 10px;
+      pointer-events: none;
+      box-shadow: 0 0 10px red;
+    }
+
+    button {
+      margin-top: 15px;
+      padding: 10px 20px;
+      background: #007bff;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    table {
+      margin: 20px auto;
+      border-collapse: collapse;
+      width: 90%;
+    }
+
+    th, td {
+      border: 1px solid #ccc;
+      padding: 8px;
+      text-align: left;
+    }
+
+    th {
+      background-color: #f0f0f0;
+    }
   </style>
 </head>
 <body>
 
-  <h2>📷 Escanear Ubicación (Cámara Trasera)</h2>
-  <video id="video"></video>
+  <h2>📦 Escanear Código con Cámara Trasera</h2>
+
+  <div class="video-container">
+    <video id="video" autoplay></video>
+    <div class="overlay"></div> <!-- Marco de enfoque -->
+  </div>
+
+  <br />
   <button id="capturar">📸 Capturar Código</button>
+
   <div id="resultado"></div>
 
   <script>
@@ -32,16 +90,15 @@
       const backCamera = videoInputDevices.find(d => d.label.toLowerCase().includes('back')) || videoInputDevices[0];
       selectedDeviceId = backCamera.deviceId;
 
-      codeReader.decodeFromVideoDevice(selectedDeviceId, 'video', (result, err) => {
-        // escaneo manual con botón
-      });
+      // Previsualización de la cámara (sin escanear todavía)
+      codeReader.decodeFromVideoDevice(selectedDeviceId, 'video', () => {});
     });
 
     boton.addEventListener('click', async () => {
       try {
         const result = await codeReader.decodeOnceFromVideoDevice(selectedDeviceId, 'video');
         const ubicacion = result.text;
-        resultado.innerHTML = `<p><strong>Ubicación:</strong> ${ubicacion}</p>`;
+        resultado.innerHTML = `<p><strong>Ubicación escaneada:</strong> ${ubicacion}</p>`;
 
         fetch(`/buscar/?ubicacion=${ubicacion}`)
           .then(res => res.json())
@@ -61,11 +118,11 @@
                 </table>
               `;
             } else {
-              resultado.innerHTML += `<p>No hay productos en esta ubicación.</p>`;
+              resultado.innerHTML += `<p>⚠️ No se encontraron productos para esa ubicación.</p>`;
             }
           });
       } catch (err) {
-        resultado.innerHTML = `<p style="color:red;">❌ No se pudo leer el código.</p>`;
+        resultado.innerHTML = `<p style="color:red;">❌ Error: No se pudo leer el código.</p>`;
       }
     });
   </script>

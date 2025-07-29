@@ -185,7 +185,21 @@ def inicio(request):
 from django.shortcuts import render
 
 def escaner_ubicacion(request):
-    return render(request, 'inventario/escaner.html')
+    return render(request, 'inventario/escanear.html')
+
+
+#capturar codigo 128b
+
+# views.py
+from django.http import JsonResponse
+from .models import Producto
+
+def buscar_por_ubicacion(request):
+    ubicacion = request.GET.get('ubicacion', '')
+    productos = Producto.objects.filter(ubicacion=ubicacion)
+    datos = list(productos.values('cod_sistema', 'descripcion', 'cod_ean', 'cod_dun', 'cajas'))
+    return JsonResponse({'productos': datos})
+
 
 
 

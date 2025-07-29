@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Escanear Ubicación</title>
+  <script src="https://unpkg.com/@zxing/library@latest"></script>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    video { width: 100%; max-width: 600px; border: 2px solid #333; border-radius: 8px; }
+    button { margin-top: 10px; padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 6px; cursor: pointer; }
+    table { margin-top: 20px; border-collapse: collapse; width: 100%; }
+    th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+    th { background-color: #f0f0f0; }
+  </style>
+</head>
+<body>
+
+  <h2>📷 Escanear Ubicación (Cámara Trasera)</h2>
+  <video id="video"></video>
+  <button id="capturar">📸 Capturar Código</button>
+  <div id="resultado"></div>
+
+  <script>
+    const codeReader = new ZXing.BrowserBarcodeReader();
+    const video = document.getElementById('video');
+    const boton = document.getElementById('capturar');
+    const resultado = document.getElementById('resultado');
+    let selectedDeviceId;
+
+    codeReader.getVideoInputDevices().then(videoInputDevices => {
+      const backCamera = videoInputDevices.find(d => d.label.toLowerCase().includes('back')) || videoInputDevices[0];
+      selectedDeviceId = backCamera.deviceId;
+
+      codeReader.decodeFromVideoDevice(selectedDeviceId, 'video', (result, err) => {
+        // escaneo manual con botón
+      });
+    });
+
+    boton.addEventListener('click', async () => {
+      try {
+        const result = await codeReader.decodeOnceFromVideoDevice(selectedDeviceId, 'video');
+        const ubicacion = result.text;
+        resultado.innerHTML = `<p><strong>Ubicación:</strong> ${ubicacion}</p>`;
+
+        fetch(`/buscar/?ubicacion=${ubicacion}`)
+          .then(res => res.json())
+          .then(data => {
+            if (data.productos.length > 0) {
+              resultado.innerHTML += `
+                <table>
+                  <tr><th>Código</th><th>Descripción</th><th>EAN</th><th>DUN</th><th>Cajas</th></tr>
+                  ${data.productos.map(p => `
+                    <tr>
+                      <td>${p.cod_sistema}</td>
+                      <td>${p.descripcion}</td>
+                      <td>${p.cod_ean}</td>
+                      <td>${p.cod_dun}</td>
+                      <td>${p.cajas}</td>
+                    </tr>`).join('')}
+                </table>
+              `;
+            } else {
+              resultado.innerHTML += `<p>No hay productos en esta ubicación.</p>`;
+            }
+          });
+      } catch (err) {
+        resultado.innerHTML = `<p style="color:red;">❌ No se pudo leer el código.</p>`;
+      }
+    });
+  </script>
+</body>
+</html>

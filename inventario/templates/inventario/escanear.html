@@ -2,54 +2,79 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Escanear Ubicación</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Escanear ubicación</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    video {
+      width: 100%;
+      max-width: 400px;
+      border: 2px solid #333;
+      border-radius: 10px;
+    }
+    #capture-btn {
+      margin: 10px 0;
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 5px;
+    }
+  </style>
 </head>
 <body>
 
-<h2>Escanear código de ubicación (cámara trasera)</h2>
+<h2>📍 Escanear ubicación (Cámara trasera)</h2>
 
-<video id="video" autoplay playsinline style="width:100%; max-width:400px;"></video>
-<input type="text" id="ubicacion" placeholder="O escanea..." readonly>
+<video id="video" autoplay></video><br>
+<button id="capture-btn">📷 Capturar código</button>
+
 <form method="get">
-  <input type="hidden" name="ubicacion" id="input-ubicacion">
-  <button type="submit">Buscar productos</button>
+  <input type="hidden" name="ubicacion" id="ubicacion-input">
+  <button type="submit">🔍 Buscar productos</button>
 </form>
 
 {% if productos %}
-  <h3>Productos encontrados en: {{ ubicacion }}</h3>
+  <h3>Productos en ubicación: {{ ubicacion }}</h3>
   <ul>
     {% for producto in productos %}
       <li>{{ producto.descripcion }} - Cod: {{ producto.cod_ean }}</li>
     {% endfor %}
   </ul>
 {% elif ubicacion %}
-  <p>No se encontraron productos en esta ubicación.</p>
+  <p>No hay productos en esta ubicación.</p>
 {% endif %}
+
+<!-- ZXing CDN -->
+<script src="https://unpkg.com/@zxing/browser@latest"></script>
 
 <script>
   const video = document.getElementById('video');
-  const input = document.getElementById('ubicacion');
-  const inputForm = document.getElementById('input-ubicacion');
+  const captureBtn = document.getElementById('capture-btn');
+  const inputUbicacion = document.getElementById('ubicacion-input');
 
-  navigator.mediaDevices.getUserMedia({
-    video: { facingMode: { ideal: "environment" } },
-    audio: false
-  })
-  .then(stream => {
-    video.srcObject = stream;
-  })
-  .catch(err => {
-    alert("No se pudo acceder a la cámara: " + err);
-  });
+  const codeReader = new ZXing.BrowserBarcodeReader();
 
-  // Simulación de lectura de código. Puedes usar una librería como QuaggaJS o ZXing para producción
-  video.addEventListener('click', () => {
-    const dummyCodigo = prompt("Simula el código escaneado:");
-    if (dummyCodigo) {
-      input.value = dummyCodigo;
-      inputForm.value = dummyCodigo;
+  async function startCamera() {
+    try {
+      const devices = await ZXing.BrowserCodeReader.listVideoInputDevices();
+      const backCamera = devices.find(device => device.label.toLowerCase().includes('back')) || devices[0];
+      await codeReader.decodeOnceFromVideoDevice(backCamera.deviceId, video)
+        .then(result => {
+          inputUbicacion.value = result.text;
+          document.querySelector('form').submit();
+        })
+        .catch(err => {
+          alert("Error al escanear: " + err);
+        });
+    } catch (e) {
+      alert("No se pudo acceder a la cámara: " + e);
     }
+  }
+
+  captureBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    startCamera();
   });
 </script>
 

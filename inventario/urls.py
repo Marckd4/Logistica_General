@@ -11,10 +11,11 @@ urlpatterns = [
     path('editar/<int:pk>/', views.editar_producto, name='editar_producto'),
     path('eliminar/<int:pk>/', views.eliminar_producto, name='eliminar_producto'),
     #path('escaneo-ubicacion/', views.productos_por_ubicacion_codigo, name='productos_por_ubicacion_codigo'),
-    path('escaneo-ubicacion/', views.escaneo_ubicacion, name='escaneo_ubicacion'),
+    #path('escaneo-ubicacion/', views.escaneo_ubicacion, name='escaneo_ubicacion'),
     path('registrar/', views.registrar_usuario, name='registrar_usuario'),
     path('login/', auth_views.LoginView.as_view(template_name='login.html'), name='login'),
     path('logout/', auth_views.LogoutView.as_view(), name='logout'),
+    path('escanear/', views.escanear_ubicacion, name='escanear_ubicacion'),
 
 
 ]

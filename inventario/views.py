@@ -138,21 +138,6 @@ def lista_productos(request):
 
 # scaner ubicacion
 
-
-from django.shortcuts import render
-from .models import Producto
-
-def escaneo_ubicacion(request):
-    codigo = request.GET.get('codigo')
-    productos = []
-
-    if codigo:
-        productos = Producto.objects.filter(ubicacion__iexact=codigo)
-
-    return render(request, 'inventario/escaneo_ubicacion.html', {
-        'codigo': codigo,
-        'productos': productos
-    })
     
 # inicio 
 
@@ -193,6 +178,19 @@ def inicio(request):
     return render(request, 'inventario/inicio.html')
 
 
+
+
+# escanear codigo camara - lector 
+
+# inventario/views.py
+
+from django.shortcuts import render
+from .models import Producto
+
+def escanear_ubicacion(request):
+    ubicacion = request.GET.get('ubicacion')
+    productos = Producto.objects.filter(ubicacion=ubicacion) if ubicacion else None
+    return render(request, 'inventario/escanear.html', {'productos': productos, 'ubicacion': ubicacion})
 
 
 

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Escanear Ubicación</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+
+<h2>Escanear código de ubicación (cámara trasera)</h2>
+
+<video id="video" autoplay playsinline style="width:100%; max-width:400px;"></video>
+<input type="text" id="ubicacion" placeholder="O escanea..." readonly>
+<form method="get">
+  <input type="hidden" name="ubicacion" id="input-ubicacion">
+  <button type="submit">Buscar productos</button>
+</form>
+
+{% if productos %}
+  <h3>Productos encontrados en: {{ ubicacion }}</h3>
+  <ul>
+    {% for producto in productos %}
+      <li>{{ producto.descripcion }} - Cod: {{ producto.cod_ean }}</li>
+    {% endfor %}
+  </ul>
+{% elif ubicacion %}
+  <p>No se encontraron productos en esta ubicación.</p>
+{% endif %}
+
+<script>
+  const video = document.getElementById('video');
+  const input = document.getElementById('ubicacion');
+  const inputForm = document.getElementById('input-ubicacion');
+
+  navigator.mediaDevices.getUserMedia({
+    video: { facingMode: { ideal: "environment" } },
+    audio: false
+  })
+  .then(stream => {
+    video.srcObject = stream;
+  })
+  .catch(err => {
+    alert("No se pudo acceder a la cámara: " + err);
+  });
+
+  // Simulación de lectura de código. Puedes usar una librería como QuaggaJS o ZXing para producción
+  video.addEventListener('click', () => {
+    const dummyCodigo = prompt("Simula el código escaneado:");
+    if (dummyCodigo) {
+      input.value = dummyCodigo;
+      inputForm.value = dummyCodigo;
+    }
+  });
+</script>
+
+</body>
+</html>

@@ -9,46 +9,61 @@ def lista_productos(request):
 
 
 #importar excel .
-
-import pandas as pd
+import openpyxl
 from django.shortcuts import render, redirect
-from .forms import ExcelUploadForm
+from django.contrib import messages
 from .models import Producto
 
 def importar_excel(request):
     if request.method == 'POST':
-        form = ExcelUploadForm(request.POST, request.FILES)
-        if form.is_valid():
-            archivo = request.FILES['archivo_excel']
-            df = pd.read_excel(archivo)
+        archivo = request.FILES.get('excel')
+        if not archivo:
+            messages.error(request, "No se ha seleccionado ningún archivo.")
+            return redirect('importar_excel')
 
-            for _, row in df.iterrows():
+        if not archivo.name.endswith('.xlsx'):
+            messages.error(request, "Solo archivos .xlsx son soportados.")
+            return redirect('importar_excel')
+
+        try:
+            wb = openpyxl.load_workbook(archivo)
+            hoja = wb.active
+
+            # Limpia todos los productos antes de importar (refrescar datos)
+            Producto.objects.all().delete()
+
+            for fila in hoja.iter_rows(min_row=2, values_only=True):
                 Producto.objects.create(
-                    categoria=row['Categoria'],
-                    empresa=row['Empresa'],
-                    pasillo=row['Pasillo'],
-                    ubicacion=row['Ubicación'],
-                    cod_ean=row['Cod_EAN'],
-                    cod_dun=row['Cod_DUN'],
-                    cod_sistema=row['Cod_Sistema'],
-                    descripcion=row['Descripción'],
-                    unidad=row['Unidad'],
-                    pack=row['Pack'],
-                    factorx=row['Factorx'],
-                    cajas=row['Cajas'],
-                    saldo=row['Saldo'],
-                    stock_fisico=row['Stock Físico'],
-                    observacion=row.get('Observación', ''),
-                    fecha_venc=row['Fecha_Venc'],
-                    fecha_imp=row['Fecha_IMP'],
-                    contenedor=row['Contenedor'],
-                    fecha_inv=row['Fecha_INV'],
-                    encargado=row['Encargado']
+                    categoria=fila[0],
+                    empresa=fila[1],
+                    pasillo=fila[2],
+                    ubicacion=fila[3],
+                    cod_ean=fila[4],
+                    cod_dun=fila[5],
+                    cod_sistema=fila[6],
+                    descripcion=fila[7],
+                    unidad=fila[8],
+                    pack=fila[9],
+                    factorx=fila[10] or 0,
+                    cajas=fila[11] or 0,
+                    saldo=fila[12] or 0,
+                    stock_fisico=fila[13] or 0,
+                    observacion=fila[14],
+                    fecha_venc=fila[15],
+                    fecha_imp=fila[16],
+                    contenedor=fila[17],
+                    fecha_inv=fila[18],
+                    encargado=fila[19],
                 )
-            return redirect('lista_productos')
-    else:
-        form = ExcelUploadForm()
-    return render(request, 'inventario/importar_excel.html', {'form': form})
+
+            messages.success(request, "Base de datos actualizada con éxito.")
+            return redirect('importar_excel')
+
+        except Exception as e:
+            messages.error(request, f"Error al importar: {e}")
+            return redirect('importar_excel')
+
+    return render(request, 'importar_excel.html')
 
 
 #exportar excel .

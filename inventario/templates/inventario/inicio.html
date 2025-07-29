@@ -18,7 +18,7 @@
       <ul class="navbar-nav me-auto mb-2 mb-lg-0">
         <li class="nav-item"><a class="nav-link active" href="{% url 'inicio' %}">Inicio</a></li>
         <li class="nav-item"><a class="nav-link" href="{% url 'lista_productos' %}">Productos</a></li>
-        <li class="nav-item"><a class="nav-link" href="{% url 'escanear_ubicacion' %}">Escaneo</a></li>
+        <li class="nav-item"><a class="nav-link" href="{% url 'escaner' %}">Escaneo</a></li>
         <!-- Agrega más enlaces según lo necesites -->
          <!-- Bootstrap: botón de cerrar sesión -->
         <form method="post" action="{% url 'logout' %}">
@@ -40,7 +40,7 @@
             <a href="{% url 'lista_productos' %}" class="btn btn-primary w-100">📋 Ver productos</a>
         </div>
         <div class="col-md-4 mb-3">
-            <a href="{% url 'escanear_ubicacion' %}" class="btn btn-success w-100">📷 Escanear ubicación</a>
+            <a href="{% url 'escaner' %}" class="btn btn-success w-100">📷 Escanear ubicación</a>
         </div>
         <div class="col-md-4 mb-3">
             <a href="{% url 'exportar_excel' %}" class="btn btn-warning w-100">⬇️ Exportar a Excel</a>

@@ -182,15 +182,11 @@ def inicio(request):
 
 # escanear codigo camara - lector 
 
-# inventario/views.py
-
 from django.shortcuts import render
-from .models import Producto
 
-def escanear_ubicacion(request):
-    ubicacion = request.GET.get('ubicacion')
-    productos = Producto.objects.filter(ubicacion=ubicacion) if ubicacion else None
-    return render(request, 'inventario/escanear.html', {'productos': productos, 'ubicacion': ubicacion})
+def escaner_ubicacion(request):
+    return render(request, 'inventario/escaner.html')
+
 
 
 

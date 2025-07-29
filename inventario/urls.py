@@ -15,7 +15,8 @@ urlpatterns = [
     path('registrar/', views.registrar_usuario, name='registrar_usuario'),
     path('login/', auth_views.LoginView.as_view(template_name='login.html'), name='login'),
     path('logout/', auth_views.LogoutView.as_view(), name='logout'),
-    path('escanear/', views.escanear_ubicacion, name='escanear_ubicacion'),
+    #path('escanear/', views.escanear_ubicacion, name='escanear_ubicacion'),
+    path('escaner/', views.escaner_ubicacion, name='escaner'),
 
 
 ]

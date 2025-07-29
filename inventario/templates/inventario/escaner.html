@@ -1,0 +1,88 @@
+<!-- inventario/templates/inventario/escaner.html -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Escáner de Ubicación</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script type="module">
+    import { BrowserMultiFormatReader } from 'https://cdn.jsdelivr.net/npm/@zxing/browser@0.1.1/+esm';
+
+    const codeReader = new BrowserMultiFormatReader();
+    const videoElement = document.getElementById('video');
+    const tbody = document.getElementById('product-body');
+    const tabla = document.getElementById('result-table');
+
+    async function iniciarCamara() {
+      try {
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        const camaraTrasera = devices.find(d => d.label.toLowerCase().includes('back'))?.deviceId;
+
+        await codeReader.decodeFromVideoDevice(camaraTrasera, videoElement, (result, err) => {
+          if (result) {
+            mostrarProductosPorUbicacion(result.getText());
+            codeReader.reset();
+          }
+        });
+      } catch (err) {
+        alert("Error al acceder a la cámara: " + err.message);
+      }
+    }
+
+    function mostrarProductosPorUbicacion(ubicacion) {
+      // Aquí pones datos simulados o puedes hacer una llamada AJAX a Django
+      const datos = [
+        { ubicacion: 'UBIC123', cod_sistema: 'SYS001', descripcion: 'Caja A', cod_ean: '123', cod_dun: '456', cajas: 10 },
+        { ubicacion: 'UBIC123', cod_sistema: 'SYS002', descripcion: 'Caja B', cod_ean: '789', cod_dun: '012', cajas: 4 },
+      ];
+
+      const resultados = datos.filter(item => item.ubicacion === ubicacion);
+      tbody.innerHTML = '';
+
+      if (resultados.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6">No hay productos para esta ubicación</td></tr>';
+      } else {
+        resultados.forEach(p => {
+          tbody.innerHTML += `
+            <tr>
+              <td>${p.cod_sistema}</td>
+              <td>${p.descripcion}</td>
+              <td>${p.cod_ean}</td>
+              <td>${p.cod_dun}</td>
+              <td>${p.cajas}</td>
+              <td><button class="btn">Acción</button></td>
+            </tr>`;
+        });
+      }
+
+      tabla.style.display = 'table';
+    }
+
+    window.addEventListener('DOMContentLoaded', iniciarCamara);
+  </script>
+  <style>
+    video { width: 100%; border: 2px solid #333; border-radius: 10px; }
+    table { margin-top: 20px; width: 100%; border-collapse: collapse; display: none; }
+    th, td { padding: 8px; border: 1px solid #ccc; }
+    th { background-color: #eee; }
+  </style>
+</head>
+<body>
+  <h2>Escanear ubicación (Cámara Trasera)</h2>
+  <video id="video" autoplay></video>
+
+  <table id="result-table">
+    <thead>
+      <tr>
+        <th>Código Sistema</th>
+        <th>Descripción</th>
+        <th>EAN</th>
+        <th>DUN</th>
+        <th>Cajas</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody id="product-body"></tbody>
+  </table>
+</body>
+</html>

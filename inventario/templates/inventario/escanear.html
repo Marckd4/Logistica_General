@@ -2,20 +2,19 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Escanear ubicación</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Escanear Ubicación</title>
   <style>
     video {
       width: 100%;
       max-width: 400px;
-      border: 2px solid #333;
+      border: 2px solid #000;
       border-radius: 10px;
     }
-    #capture-btn {
-      margin: 10px 0;
+    #start-scan {
+      margin-top: 10px;
       padding: 10px 20px;
-      font-size: 16px;
-      background-color: #4CAF50;
+      background: green;
       color: white;
       border: none;
       border-radius: 5px;
@@ -24,57 +23,58 @@
 </head>
 <body>
 
-<h2>📍 Escanear ubicación (Cámara trasera)</h2>
+<h2>📷 Escanear Código de Ubicación</h2>
 
-<video id="video" autoplay></video><br>
-<button id="capture-btn">📷 Capturar código</button>
+<video id="video" autoplay playsinline></video>
+<br>
+<button id="start-scan">Iniciar Escaneo</button>
 
 <form method="get">
-  <input type="hidden" name="ubicacion" id="ubicacion-input">
-  <button type="submit">🔍 Buscar productos</button>
+  <input type="hidden" id="ubicacion-input" name="ubicacion">
+  <button type="submit">Buscar productos</button>
 </form>
 
 {% if productos %}
-  <h3>Productos en ubicación: {{ ubicacion }}</h3>
+  <h3>📦 Productos en esta ubicación:</h3>
   <ul>
-    {% for producto in productos %}
-      <li>{{ producto.descripcion }} - Cod: {{ producto.cod_ean }}</li>
+    {% for p in productos %}
+      <li>{{ p.Descripción }} ({{ p.Cod_EAN }})</li>
     {% endfor %}
   </ul>
-{% elif ubicacion %}
-  <p>No hay productos en esta ubicación.</p>
 {% endif %}
 
-<!-- ZXing CDN -->
 <script src="https://unpkg.com/@zxing/browser@latest"></script>
 
 <script>
   const video = document.getElementById('video');
-  const captureBtn = document.getElementById('capture-btn');
+  const startBtn = document.getElementById('start-scan');
   const inputUbicacion = document.getElementById('ubicacion-input');
 
-  const codeReader = new ZXing.BrowserBarcodeReader();
-
-  async function startCamera() {
+  startBtn.addEventListener('click', async () => {
     try {
-      const devices = await ZXing.BrowserCodeReader.listVideoInputDevices();
-      const backCamera = devices.find(device => device.label.toLowerCase().includes('back')) || devices[0];
-      await codeReader.decodeOnceFromVideoDevice(backCamera.deviceId, video)
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      const backCam = devices.find(device => device.kind === 'videoinput' && device.label.toLowerCase().includes('back')) || devices[0];
+
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          deviceId: backCam.deviceId ? { exact: backCam.deviceId } : undefined,
+          facingMode: 'environment'
+        }
+      });
+
+      video.srcObject = stream;
+
+      const codeReader = new ZXing.BrowserBarcodeReader();
+      codeReader.decodeOnceFromVideoElement(video)
         .then(result => {
           inputUbicacion.value = result.text;
           document.querySelector('form').submit();
         })
-        .catch(err => {
-          alert("Error al escanear: " + err);
-        });
-    } catch (e) {
-      alert("No se pudo acceder a la cámara: " + e);
-    }
-  }
+        .catch(err => alert("Error al escanear: " + err));
 
-  captureBtn.addEventListener('click', (e) => {
-    e.preventDefault();
-    startCamera();
+    } catch (error) {
+      alert("No se pudo acceder a la cámara: " + error.message);
+    }
   });
 </script>
 

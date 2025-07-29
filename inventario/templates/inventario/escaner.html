@@ -6,60 +6,68 @@
   <title>Escáner de Ubicación</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script type="module">
-    import { BrowserMultiFormatReader } from 'https://cdn.jsdelivr.net/npm/@zxing/browser@0.1.1/+esm';
+  import {
+    BrowserMultiFormatReader,
+    BarcodeFormat
+  } from 'https://cdn.jsdelivr.net/npm/@zxing/browser@0.1.1/+esm';
 
-    const codeReader = new BrowserMultiFormatReader();
-    const videoElement = document.getElementById('video');
-    const tbody = document.getElementById('product-body');
-    const tabla = document.getElementById('result-table');
+  const codeReader = new BrowserMultiFormatReader({
+    formats: [BarcodeFormat.CODE_128],  // <-- Aquí forzamos solo CODE_128
+  });
 
-    async function iniciarCamara() {
-      try {
-        const devices = await navigator.mediaDevices.enumerateDevices();
-        const camaraTrasera = devices.find(d => d.label.toLowerCase().includes('back'))?.deviceId;
+  const videoElement = document.getElementById('video');
+  const tbody = document.getElementById('product-body');
+  const tabla = document.getElementById('result-table');
 
-        await codeReader.decodeFromVideoDevice(camaraTrasera, videoElement, (result, err) => {
-          if (result) {
-            mostrarProductosPorUbicacion(result.getText());
-            codeReader.reset();
-          }
-        });
-      } catch (err) {
-        alert("Error al acceder a la cámara: " + err.message);
-      }
+  async function iniciarCamara() {
+    try {
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      const camaraTrasera = devices.find(d => d.kind === 'videoinput' && d.label.toLowerCase().includes('back'))?.deviceId;
+
+      await codeReader.decodeFromVideoDevice(camaraTrasera, videoElement, (result, err) => {
+        if (result) {
+          console.log("Código escaneado:", result.getText());
+          mostrarProductosPorUbicacion(result.getText());
+          codeReader.reset(); // detener escaneo después de éxito
+        }
+      });
+    } catch (err) {
+      alert("Error al acceder a la cámara: " + err.message);
+    }
+  }
+
+  function mostrarProductosPorUbicacion(ubicacion) {
+    const datos = [
+      { ubicacion: '128ABC', cod_sistema: 'SYS001', descripcion: 'Caja A', cod_ean: '123', cod_dun: '456', cajas: 10 },
+      { ubicacion: '128DEF', cod_sistema: 'SYS002', descripcion: 'Caja B', cod_ean: '789', cod_dun: '012', cajas: 4 },
+    ];
+
+    const resultados = datos.filter(item => item.ubicacion === ubicacion);
+    tbody.innerHTML = '';
+
+    if (resultados.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="6">No hay productos para esta ubicación</td></tr>';
+    } else {
+      resultados.forEach(p => {
+        tbody.innerHTML += `
+          <tr>
+            <td>${p.cod_sistema}</td>
+            <td>${p.descripcion}</td>
+            <td>${p.cod_ean}</td>
+            <td>${p.cod_dun}</td>
+            <td>${p.cajas}</td>
+            <td><button class="btn">Acción</button></td>
+          </tr>`;
+      });
     }
 
-    function mostrarProductosPorUbicacion(ubicacion) {
-      // Aquí pones datos simulados o puedes hacer una llamada AJAX a Django
-      const datos = [
-        { ubicacion: 'UBIC123', cod_sistema: 'SYS001', descripcion: 'Caja A', cod_ean: '123', cod_dun: '456', cajas: 10 },
-        { ubicacion: 'UBIC123', cod_sistema: 'SYS002', descripcion: 'Caja B', cod_ean: '789', cod_dun: '012', cajas: 4 },
-      ];
+    tabla.style.display = 'table';
+  }
 
-      const resultados = datos.filter(item => item.ubicacion === ubicacion);
-      tbody.innerHTML = '';
+  window.addEventListener('DOMContentLoaded', iniciarCamara);
+</script>
 
-      if (resultados.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6">No hay productos para esta ubicación</td></tr>';
-      } else {
-        resultados.forEach(p => {
-          tbody.innerHTML += `
-            <tr>
-              <td>${p.cod_sistema}</td>
-              <td>${p.descripcion}</td>
-              <td>${p.cod_ean}</td>
-              <td>${p.cod_dun}</td>
-              <td>${p.cajas}</td>
-              <td><button class="btn">Acción</button></td>
-            </tr>`;
-        });
-      }
-
-      tabla.style.display = 'table';
-    }
-
-    window.addEventListener('DOMContentLoaded', iniciarCamara);
-  </script>
+ 
   <style>
     video { width: 100%; border: 2px solid #333; border-radius: 10px; }
     table { margin-top: 20px; width: 100%; border-collapse: collapse; display: none; }
